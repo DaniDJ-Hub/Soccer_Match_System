@@ -18,8 +18,9 @@ export function Protected({ children }: { children: ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg-primary text-text-secondary">
-        Cargando…
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bg-primary text-text-secondary">
+        <span className="animate-pulse text-4xl">🐆</span>
+        <span className="text-sm">Cargando…</span>
       </div>
     );
   }

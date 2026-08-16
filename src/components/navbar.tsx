@@ -69,7 +69,7 @@ export function Navbar() {
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
           {open && (
-            <div className="absolute right-0 z-40 mt-2 w-56 rounded-xl border border-border bg-bg-secondary p-1 shadow-xl">
+            <div className="shadow-elevated absolute right-0 z-40 mt-2 w-56 rounded-xl border border-border bg-bg-secondary p-1">
               {categorias.length === 0 && (
                 <div className="px-3 py-2 text-xs text-text-muted">
                   Sin categorías aún

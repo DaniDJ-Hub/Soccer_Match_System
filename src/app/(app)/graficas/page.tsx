@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { useCategoria } from "@/lib/categoria-context";
 import { api } from "@/lib/api";
+import { BackLink } from "@/components/back-link";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -78,11 +79,17 @@ export default function GraficasPage() {
   const premiosTotal = config.premio_1 + config.premio_2 + config.premio_3 + config.premio_4;
 
   if (!categoriaId) {
-    return <p className="text-text-muted">Selecciona una categoría en el menú.</p>;
+    return (
+      <div>
+        <BackLink href="/menu" label="Volver al menú" />
+        <p className="text-text-muted">Selecciona una categoría en el menú.</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
+      <BackLink href="/menu" label="Volver al menú" />
       <div>
         <h1 className="font-display text-2xl tracking-wide">📊 Gráficas</h1>
         <p className="text-sm text-text-muted">Categoría: {categoriaNombre}</p>

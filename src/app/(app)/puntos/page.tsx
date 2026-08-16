@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCategoria } from "@/lib/categoria-context";
 import { api, type Equipo, type Partido } from "@/lib/api";
+import { BackLink } from "@/components/back-link";
+import { Skeleton } from "@/components/skeleton";
 
 type Fila = {
   nombre: string;
@@ -53,11 +55,17 @@ export default function PuntosPage() {
   }, [equipos, jornadas]);
 
   if (!categoriaId) {
-    return <p className="text-text-muted">Selecciona una categoría en el menú.</p>;
+    return (
+      <div>
+        <BackLink href="/menu" label="Volver al menú" />
+        <p className="text-text-muted">Selecciona una categoría en el menú.</p>
+      </div>
+    );
   }
 
   return (
     <div>
+      <BackLink href="/menu" label="Volver al menú" />
       <div className="mb-6">
         <h1 className="font-display text-2xl tracking-wide">🏆 Tabla de Posiciones</h1>
         <p className="text-sm text-text-muted">
@@ -66,7 +74,41 @@ export default function PuntosPage() {
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Cargando…</p>
+        <div className="overflow-x-auto rounded-2xl border border-border">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead className="bg-bg-card text-left text-text-muted">
+              <tr>
+                <th className="px-3 py-3">#</th>
+                <th className="px-3 py-3">Equipo</th>
+                <th className="px-3 py-3 text-center">PJ</th>
+                <th className="px-3 py-3 text-center">G</th>
+                <th className="px-3 py-3 text-center">E</th>
+                <th className="px-3 py-3 text-center">P</th>
+                <th className="px-3 py-3 text-center">GF</th>
+                <th className="px-3 py-3 text-center">GC</th>
+                <th className="px-3 py-3 text-center">DG</th>
+                <th className="px-3 py-3 text-center font-bold">Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="border-t border-border">
+                  <td className="px-3 py-2.5">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Skeleton className="h-4 w-24" />
+                  </td>
+                  {Array.from({ length: 8 }).map((_, j) => (
+                    <td key={j} className="px-3 py-2.5 text-center">
+                      <Skeleton className="mx-auto h-4 w-6" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : tabla.length === 0 ? (
         <p className="text-text-muted">Sin equipos registrados.</p>
       ) : (

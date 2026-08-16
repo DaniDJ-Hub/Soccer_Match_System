@@ -6,6 +6,8 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { useCategoria } from "@/lib/categoria-context";
 import { api } from "@/lib/api";
 import { MODULOS } from "@/lib/modulos";
+import { Button } from "@/components/button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export default function MenuPage() {
   const { categorias, categoriaId, categoriaNombre, setCategoria, reload } = useCategoria();
@@ -72,12 +74,9 @@ export default function MenuPage() {
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
-        >
+        <Button onClick={openCreate}>
           <Plus className="h-4 w-4" /> Nueva Categoría
-        </button>
+        </Button>
 
         <div className="flex-1 flex-wrap gap-2 flex">
           {categorias.length === 0 && (
@@ -97,6 +96,7 @@ export default function MenuPage() {
             >
               🏆 {c.nombre}
               <button
+                aria-label={`Editar categoría ${c.nombre}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   openEdit(c);
@@ -106,6 +106,7 @@ export default function MenuPage() {
                 <Pencil className="h-3 w-3" />
               </button>
               <button
+                aria-label={`Eliminar categoría ${c.nombre}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setConfirmDelete(c);
@@ -157,12 +158,13 @@ export default function MenuPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6">
+          <div className="card shadow-elevated w-full max-w-sm rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl tracking-wide">
-                {editing ? "✏️ Editar Categoría" : "⚡ Nueva Categoría"}
+              <h2 className="flex items-center gap-2 font-display text-xl tracking-wide">
+                {editing ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {editing ? "Editar Categoría" : "Nueva Categoría"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="cursor-pointer">
+              <button aria-label="Cerrar" onClick={() => setShowModal(false)} className="cursor-pointer">
                 <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
@@ -175,39 +177,24 @@ export default function MenuPage() {
               placeholder="Nombre de la categoría"
             />
             {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
-            <button
-              onClick={guardar}
-              className="mt-4 w-full rounded-lg bg-accent py-2.5 font-semibold text-white hover:opacity-90 cursor-pointer"
-            >
+            <Button block onClick={guardar} className="mt-4">
               Guardar
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6 text-center">
-            <p className="mb-4">
+        <ConfirmDialog
+          message={
+            <>
               ¿Eliminar la categoría <b>{confirmDelete.nombre}</b>? Esto también
               borrará sus equipos y jugadores.
-            </p>
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="rounded-lg border border-border px-4 py-2 text-sm cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={eliminar}
-                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white cursor-pointer"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={eliminar}
+        />
       )}
     </div>
   );

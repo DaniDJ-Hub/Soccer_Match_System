@@ -43,7 +43,7 @@ export default function LoginPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="card relative w-full max-w-sm rounded-2xl p-8 shadow-2xl"
+        className="card shadow-elevated relative w-full max-w-sm rounded-2xl p-8"
       >
         <div className="mb-6 text-center">
           <div className="text-5xl">🐆</div>
@@ -77,6 +77,7 @@ export default function LoginPage() {
           />
           <button
             type="button"
+            aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"}
             onClick={() => setShowPw((v) => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted cursor-pointer"
           >

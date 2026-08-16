@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, X, Users } from "lucide-react";
+import Image from "next/image";
+import { Plus, Pencil, Trash2, X, Users, Palette } from "lucide-react";
 import { useCategoria } from "@/lib/categoria-context";
 import { api, type Equipo } from "@/lib/api";
+import { BackLink } from "@/components/back-link";
+import { Skeleton } from "@/components/skeleton";
+import { Button } from "@/components/button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const COLORES_SUGERIDOS = [
   "#22c55e", "#3b82f6", "#ef4444", "#eab308", "#a855f7",
@@ -78,29 +83,43 @@ export default function EquiposPage() {
 
   if (!categoriaId) {
     return (
-      <p className="text-text-muted">
-        Selecciona una categoría en el menú para gestionar sus equipos.
-      </p>
+      <div>
+        <BackLink href="/menu" label="Volver al menú" />
+        <p className="text-text-muted">
+          Selecciona una categoría en el menú para gestionar sus equipos.
+        </p>
+      </div>
     );
   }
 
   return (
     <div>
+      <BackLink href="/menu" label="Volver al menú" />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl tracking-wide">👥 Equipos</h1>
           <p className="text-sm text-text-muted">Categoría: {categoriaNombre}</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 cursor-pointer"
-        >
+        <Button onClick={openCreate}>
           <Plus className="h-4 w-4" /> Nuevo Equipo
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Cargando…</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="card rounded-2xl p-5">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-2 w-14 rounded-full" />
+                </div>
+              </div>
+              <Skeleton className="mt-4 h-9 w-full" />
+            </div>
+          ))}
+        </div>
       ) : equipos.length === 0 ? (
         <p className="text-text-muted">Aún no hay equipos en esta categoría.</p>
       ) : (
@@ -110,10 +129,12 @@ export default function EquiposPage() {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {eq.escudo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={eq.escudo}
                       alt={eq.nombre}
+                      width={48}
+                      height={48}
+                      unoptimized
                       className="h-12 w-12 rounded-full object-cover"
                     />
                   ) : (
@@ -133,10 +154,18 @@ export default function EquiposPage() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(eq)} className="cursor-pointer p-1 text-text-muted hover:text-text-primary">
+                  <button
+                    aria-label={`Editar equipo ${eq.nombre}`}
+                    onClick={() => openEdit(eq)}
+                    className="cursor-pointer p-1 text-text-muted hover:text-text-primary"
+                  >
                     <Pencil className="h-4 w-4" />
                   </button>
-                  <button onClick={() => setConfirmDelete(eq)} className="cursor-pointer p-1 text-text-muted hover:text-red-400">
+                  <button
+                    aria-label={`Eliminar equipo ${eq.nombre}`}
+                    onClick={() => setConfirmDelete(eq)}
+                    className="cursor-pointer p-1 text-text-muted hover:text-red-400"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -154,12 +183,13 @@ export default function EquiposPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6">
+          <div className="card shadow-elevated w-full max-w-sm rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl tracking-wide">
-                {editing ? "✏️ Editar Equipo" : "⚡ Nuevo Equipo"}
+              <h2 className="flex items-center gap-2 font-display text-xl tracking-wide">
+                {editing ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {editing ? "Editar Equipo" : "Nuevo Equipo"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="cursor-pointer">
+              <button aria-label="Cerrar" onClick={() => setShowModal(false)} className="cursor-pointer">
                 <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
@@ -182,6 +212,8 @@ export default function EquiposPage() {
               {COLORES_SUGERIDOS.map((c) => (
                 <button
                   key={c}
+                  aria-label={`Color ${c}`}
+                  aria-pressed={form.color === c}
                   onClick={() => setForm((f) => ({ ...f, color: c }))}
                   className="h-7 w-7 rounded-full cursor-pointer ring-offset-2 ring-offset-bg-card"
                   style={{
@@ -191,12 +223,24 @@ export default function EquiposPage() {
                   }}
                 />
               ))}
-              <input
-                type="color"
-                value={form.color}
-                onChange={(e) => setForm((f) => ({ ...f, color: e.target.value }))}
-                className="h-7 w-7 cursor-pointer bg-transparent"
-              />
+              <label
+                className="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-border"
+                style={{
+                  background: COLORES_SUGERIDOS.includes(form.color) ? "var(--bg-secondary)" : form.color,
+                  outline: !COLORES_SUGERIDOS.includes(form.color) ? `2px solid ${form.color}` : "none",
+                  outlineOffset: "2px",
+                }}
+                title="Color personalizado"
+              >
+                <Palette className="h-3.5 w-3.5 text-white/80 mix-blend-difference" />
+                <input
+                  type="color"
+                  aria-label="Color personalizado"
+                  value={form.color}
+                  onChange={(e) => setForm((f) => ({ ...f, color: e.target.value }))}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                />
+              </label>
             </div>
 
             <label className="mb-1 block text-xs font-semibold uppercase text-text-secondary">
@@ -210,32 +254,23 @@ export default function EquiposPage() {
             />
 
             {error && <p className="mb-2 text-sm text-red-400">{error}</p>}
-            <button
-              onClick={guardar}
-              className="mt-2 w-full rounded-lg bg-accent py-2.5 font-semibold text-white hover:opacity-90 cursor-pointer"
-            >
+            <Button block onClick={guardar} className="mt-2">
               Guardar
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6 text-center">
-            <p className="mb-4">
+        <ConfirmDialog
+          message={
+            <>
               ¿Eliminar el equipo <b>{confirmDelete.nombre}</b> y todos sus jugadores?
-            </p>
-            <div className="flex justify-center gap-3">
-              <button onClick={() => setConfirmDelete(null)} className="rounded-lg border border-border px-4 py-2 text-sm cursor-pointer">
-                Cancelar
-              </button>
-              <button onClick={eliminar} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white cursor-pointer">
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={eliminar}
+        />
       )}
     </div>
   );

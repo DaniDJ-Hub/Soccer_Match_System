@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useCategoria } from "@/lib/categoria-context";
 import { api, type Equipo, type HorarioItem } from "@/lib/api";
+import { BackLink } from "@/components/back-link";
+import { Skeleton } from "@/components/skeleton";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -55,13 +57,19 @@ export default function HorariosPage() {
   }
 
   if (!categoriaId) {
-    return <p className="text-text-muted">Selecciona una categoría en el menú.</p>;
+    return (
+      <div>
+        <BackLink href="/menu" label="Volver al menú" />
+        <p className="text-text-muted">Selecciona una categoría en el menú.</p>
+      </div>
+    );
   }
 
   const agrupado = DIAS.map((dia) => ({ dia, partidos: items.filter((i) => i.dia === dia) }));
 
   return (
     <div>
+      <BackLink href="/menu" label="Volver al menú" />
       <div className="mb-6">
         <h1 className="font-display text-2xl tracking-wide">⏰ Horarios</h1>
         <p className="text-sm text-text-muted">Categoría: {categoriaNombre}</p>
@@ -69,60 +77,83 @@ export default function HorariosPage() {
 
       <div className="card mb-6 rounded-2xl p-5">
         <h3 className="mb-3 font-display text-lg tracking-wide">Programar partido</h3>
-        <div className="flex flex-wrap gap-2">
-          <select
-            value={form.dia}
-            onChange={(e) => setForm((f) => ({ ...f, dia: e.target.value }))}
-            className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-          >
-            {DIAS.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-          <input
-            type="time"
-            value={form.hora}
-            onChange={(e) => setForm((f) => ({ ...f, hora: e.target.value }))}
-            className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-          />
-          <select
-            value={form.equipoLocal}
-            onChange={(e) => setForm((f) => ({ ...f, equipoLocal: e.target.value }))}
-            className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-          >
-            <option value="">Local…</option>
-            {equipos.map((e) => (
-              <option key={e.id} value={e.nombre}>{e.nombre}</option>
-            ))}
-          </select>
-          <span className="self-center text-text-muted text-sm">vs</span>
-          <select
-            value={form.equipoVisitante}
-            onChange={(e) => setForm((f) => ({ ...f, equipoVisitante: e.target.value }))}
-            className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-          >
-            <option value="">Visitante…</option>
-            {equipos.map((e) => (
-              <option key={e.id} value={e.nombre}>{e.nombre}</option>
-            ))}
-          </select>
-          <input
-            value={form.cancha}
-            onChange={(e) => setForm((f) => ({ ...f, cancha: e.target.value }))}
-            placeholder="Cancha (opcional)"
-            className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-          />
-          <button
-            onClick={agregar}
-            className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5" /> Agregar
-          </button>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div>
+            <label className="mb-1 block text-xs text-text-muted">Día</label>
+            <select
+              value={form.dia}
+              onChange={(e) => setForm((f) => ({ ...f, dia: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+            >
+              {DIAS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-text-muted">Hora</label>
+            <input
+              type="time"
+              value={form.hora}
+              onChange={(e) => setForm((f) => ({ ...f, hora: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-text-muted">Local</label>
+            <select
+              value={form.equipoLocal}
+              onChange={(e) => setForm((f) => ({ ...f, equipoLocal: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+            >
+              <option value="">Selecciona…</option>
+              {equipos.map((e) => (
+                <option key={e.id} value={e.nombre}>{e.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-text-muted">Visitante</label>
+            <select
+              value={form.equipoVisitante}
+              onChange={(e) => setForm((f) => ({ ...f, equipoVisitante: e.target.value }))}
+              className="w-full rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+            >
+              <option value="">Selecciona…</option>
+              {equipos.map((e) => (
+                <option key={e.id} value={e.nombre}>{e.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-text-muted">Cancha</label>
+            <input
+              value={form.cancha}
+              onChange={(e) => setForm((f) => ({ ...f, cancha: e.target.value }))}
+              placeholder="Opcional"
+              className="w-full rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={agregar}
+              className="flex w-full items-center justify-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90 cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" /> Agregar
+            </button>
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Cargando…</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="card rounded-2xl p-4">
+              <Skeleton className="mb-2 h-5 w-20" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {agrupado.map(({ dia, partidos }) => (
@@ -140,7 +171,11 @@ export default function HorariosPage() {
                           <div className="font-mono text-xs text-text-muted">{p.hora} {p.cancha && `· ${p.cancha}`}</div>
                           <div>{p.equipoLocal} <span className="text-text-muted">vs</span> {p.equipoVisitante}</div>
                         </div>
-                        <button onClick={() => eliminar(p.id)} className="cursor-pointer text-text-muted hover:text-red-400">
+                        <button
+                          aria-label={`Eliminar partido ${p.equipoLocal} vs ${p.equipoVisitante}`}
+                          onClick={() => eliminar(p.id)}
+                          className="cursor-pointer text-text-muted hover:text-red-400"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

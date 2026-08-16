@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, Star } from "lucide-react";
 import { useCategoria } from "@/lib/categoria-context";
 import { api, type Equipo, type Partido } from "@/lib/api";
+import { BackLink } from "@/components/back-link";
+import { Skeleton } from "@/components/skeleton";
+import { Button } from "@/components/button";
 
 export default function RolPage() {
   const { categoriaId, categoriaNombre } = useCategoria();
@@ -102,11 +105,17 @@ export default function RolPage() {
   }
 
   if (!categoriaId) {
-    return <p className="text-text-muted">Selecciona una categoría en el menú.</p>;
+    return (
+      <div>
+        <BackLink href="/menu" label="Volver al menú" />
+        <p className="text-text-muted">Selecciona una categoría en el menú.</p>
+      </div>
+    );
   }
 
   return (
     <div>
+      <BackLink href="/menu" label="Volver al menú" />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl tracking-wide">📅 Rol de Juegos</h1>
@@ -114,16 +123,23 @@ export default function RolPage() {
             Categoría: {categoriaNombre} {saving && "· guardando…"}
           </p>
         </div>
-        <button
-          onClick={agregarJornada}
-          className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 cursor-pointer"
-        >
+        <Button onClick={agregarJornada}>
           <Plus className="h-4 w-4" /> Nueva Jornada
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Cargando…</p>
+        <div className="space-y-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="card rounded-2xl p-5">
+              <Skeleton className="mb-3 h-6 w-28" />
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : equipos.length < 2 ? (
         <p className="text-text-muted">Necesitas al menos 2 equipos para generar un rol.</p>
       ) : jornadas.length === 0 ? (
@@ -143,10 +159,17 @@ export default function RolPage() {
                       doradas.includes(jIdx) ? "text-yellow-400" : "text-text-muted"
                     }`}
                     title="Marcar jornada dorada"
+                    aria-label={
+                      doradas.includes(jIdx)
+                        ? `Quitar jornada ${jIdx + 1} de dorada`
+                        : `Marcar jornada ${jIdx + 1} como dorada`
+                    }
+                    aria-pressed={doradas.includes(jIdx)}
                   >
                     <Star className="h-4 w-4" fill={doradas.includes(jIdx) ? "currentColor" : "none"} />
                   </button>
                   <button
+                    aria-label={`Eliminar jornada ${jIdx + 1}`}
                     onClick={() => eliminarJornada(jIdx)}
                     className="cursor-pointer p-1.5 text-text-muted hover:text-red-400"
                   >
@@ -200,38 +223,56 @@ export default function RolPage() {
                       />
                       Jugado
                     </label>
-                    <button onClick={guardarPartido} className="cursor-pointer p-1 text-text-muted hover:text-accent">
+                    <button
+                      aria-label={`Guardar partido ${p.local} vs ${p.visitante}`}
+                      onClick={guardarPartido}
+                      className="cursor-pointer p-1 text-text-muted hover:text-accent"
+                    >
                       <Save className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => eliminarPartido(jIdx, pIdx)} className="cursor-pointer p-1 text-text-muted hover:text-red-400">
+                    <button
+                      aria-label={`Eliminar partido ${p.local} vs ${p.visitante}`}
+                      onClick={() => eliminarPartido(jIdx, pIdx)}
+                      className="cursor-pointer p-1 text-text-muted hover:text-red-400"
+                    >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <select
-                  value={nuevoLocal[jIdx] || ""}
-                  onChange={(e) => setNuevoLocal((s) => ({ ...s, [jIdx]: e.target.value }))}
-                  className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-                >
-                  <option value="">Local…</option>
-                  {equipos.map((e) => (
-                    <option key={e.id} value={e.nombre}>{e.nombre}</option>
-                  ))}
-                </select>
-                <span className="text-text-muted text-sm">vs</span>
-                <select
-                  value={nuevoVisitante[jIdx] || ""}
-                  onChange={(e) => setNuevoVisitante((s) => ({ ...s, [jIdx]: e.target.value }))}
-                  className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
-                >
-                  <option value="">Visitante…</option>
-                  {equipos.map((e) => (
-                    <option key={e.id} value={e.nombre}>{e.nombre}</option>
-                  ))}
-                </select>
+              <div className="mt-3 flex flex-wrap items-end gap-2">
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase text-text-secondary">
+                    Local
+                  </label>
+                  <select
+                    value={nuevoLocal[jIdx] || ""}
+                    onChange={(e) => setNuevoLocal((s) => ({ ...s, [jIdx]: e.target.value }))}
+                    className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+                  >
+                    <option value="">Selecciona…</option>
+                    {equipos.map((e) => (
+                      <option key={e.id} value={e.nombre}>{e.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+                <span className="pb-2 text-text-muted text-sm">vs</span>
+                <div>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase text-text-secondary">
+                    Visitante
+                  </label>
+                  <select
+                    value={nuevoVisitante[jIdx] || ""}
+                    onChange={(e) => setNuevoVisitante((s) => ({ ...s, [jIdx]: e.target.value }))}
+                    className="rounded-lg border border-border bg-bg-secondary px-2 py-1.5 text-sm"
+                  >
+                    <option value="">Selecciona…</option>
+                    {equipos.map((e) => (
+                      <option key={e.id} value={e.nombre}>{e.nombre}</option>
+                    ))}
+                  </select>
+                </div>
                 <button
                   onClick={() => agregarPartido(jIdx)}
                   className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-card-hover cursor-pointer"

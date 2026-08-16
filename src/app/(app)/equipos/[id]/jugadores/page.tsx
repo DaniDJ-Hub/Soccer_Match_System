@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Pencil, Trash2, X, UserX, UserCheck } from "lucide-react";
+import { useParams } from "next/navigation";
+import Image from "next/image";
+import { Plus, Pencil, Trash2, X, UserX, UserCheck } from "lucide-react";
 import { api, type Jugador, type Equipo } from "@/lib/api";
 import { useCategoria } from "@/lib/categoria-context";
+import { BackLink } from "@/components/back-link";
+import { Skeleton } from "@/components/skeleton";
+import { Button } from "@/components/button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export default function JugadoresPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const equipoId = Number(params.id);
   const { categoriaId } = useCategoria();
 
@@ -91,12 +95,7 @@ export default function JugadoresPage() {
 
   return (
     <div>
-      <button
-        onClick={() => router.push("/equipos")}
-        className="mb-4 flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary cursor-pointer"
-      >
-        <ArrowLeft className="h-4 w-4" /> Volver a equipos
-      </button>
+      <BackLink href="/equipos" label="Volver a equipos" />
 
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -105,16 +104,49 @@ export default function JugadoresPage() {
           </h1>
           <p className="text-sm text-text-muted">{jugadores.length} jugador(es) registrados</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 cursor-pointer"
-        >
+        <Button onClick={openCreate}>
           <Plus className="h-4 w-4" /> Nuevo Jugador
-        </button>
+        </Button>
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Cargando…</p>
+        <div className="overflow-hidden rounded-2xl border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-bg-card text-left text-text-muted">
+              <tr>
+                <th className="px-4 py-3">#</th>
+                <th className="px-4 py-3">Nombre</th>
+                <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <tr key={i} className="border-t border-border">
+                  <td className="px-4 py-3">
+                    <Skeleton className="h-4 w-6" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Skeleton className="h-5 w-14 rounded-full" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="h-4 w-4" />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : jugadores.length === 0 ? (
         <p className="text-text-muted">Aún no hay jugadores en este equipo.</p>
       ) : (
@@ -134,8 +166,14 @@ export default function JugadoresPage() {
                   <td className="px-4 py-3 font-mono">{j.numero ?? "—"}</td>
                   <td className="px-4 py-3 flex items-center gap-2">
                     {j.foto ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={j.foto} alt={j.nombre} className="h-8 w-8 rounded-full object-cover" />
+                      <Image
+                        src={j.foto}
+                        alt={j.nombre}
+                        width={32}
+                        height={32}
+                        unoptimized
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-secondary text-xs">
                         {j.nombre.slice(0, 2).toUpperCase()}
@@ -152,13 +190,26 @@ export default function JugadoresPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => toggleBaja(j)} className="cursor-pointer p-1 text-text-muted hover:text-text-primary" title={j.baja ? "Reactivar" : "Dar de baja"}>
+                      <button
+                        onClick={() => toggleBaja(j)}
+                        className="cursor-pointer p-1 text-text-muted hover:text-text-primary"
+                        title={j.baja ? "Reactivar" : "Dar de baja"}
+                        aria-label={j.baja ? `Reactivar a ${j.nombre}` : `Dar de baja a ${j.nombre}`}
+                      >
                         {j.baja ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
                       </button>
-                      <button onClick={() => openEdit(j)} className="cursor-pointer p-1 text-text-muted hover:text-text-primary">
+                      <button
+                        aria-label={`Editar a ${j.nombre}`}
+                        onClick={() => openEdit(j)}
+                        className="cursor-pointer p-1 text-text-muted hover:text-text-primary"
+                      >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button onClick={() => setConfirmDelete(j)} className="cursor-pointer p-1 text-text-muted hover:text-red-400">
+                      <button
+                        aria-label={`Eliminar a ${j.nombre}`}
+                        onClick={() => setConfirmDelete(j)}
+                        className="cursor-pointer p-1 text-text-muted hover:text-red-400"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -172,12 +223,13 @@ export default function JugadoresPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6">
+          <div className="card shadow-elevated w-full max-w-sm rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl tracking-wide">
-                {editing ? "✏️ Editar Jugador" : "⚡ Nuevo Jugador"}
+              <h2 className="flex items-center gap-2 font-display text-xl tracking-wide">
+                {editing ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {editing ? "Editar Jugador" : "Nuevo Jugador"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="cursor-pointer">
+              <button aria-label="Cerrar" onClick={() => setShowModal(false)} className="cursor-pointer">
                 <X className="h-5 w-5 text-text-muted" />
               </button>
             </div>
@@ -209,32 +261,23 @@ export default function JugadoresPage() {
             />
 
             {error && <p className="mb-2 text-sm text-red-400">{error}</p>}
-            <button
-              onClick={guardar}
-              className="mt-2 w-full rounded-lg bg-accent py-2.5 font-semibold text-white hover:opacity-90 cursor-pointer"
-            >
+            <Button block onClick={guardar} className="mt-2">
               Guardar
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="card w-full max-w-sm rounded-2xl p-6 text-center">
-            <p className="mb-4">
+        <ConfirmDialog
+          message={
+            <>
               ¿Eliminar a <b>{confirmDelete.nombre}</b>?
-            </p>
-            <div className="flex justify-center gap-3">
-              <button onClick={() => setConfirmDelete(null)} className="rounded-lg border border-border px-4 py-2 text-sm cursor-pointer">
-                Cancelar
-              </button>
-              <button onClick={eliminar} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white cursor-pointer">
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={eliminar}
+        />
       )}
     </div>
   );

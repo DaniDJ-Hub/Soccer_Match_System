@@ -12,7 +12,7 @@
   --border-accent: rgba(59, 130, 246, 0.3);
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.6);
-  --text-muted: rgba(255, 255, 255, 0.35);
+  --text-muted: rgba(255, 255, 255, 0.5);
   --accent: #22c55e;
   --accent-2: #eab308;
   --accent-3: #6366f1;
@@ -27,8 +27,8 @@
   --border: rgba(0, 0, 0, 0.08);
   --border-accent: rgba(37, 99, 235, 0.3);
   --text-primary: #0f172a;
-  --text-secondary: rgba(15, 23, 42, 0.6);
-  --text-muted: rgba(15, 23, 42, 0.35);
+  --text-secondary: rgba(15, 23, 42, 0.75);
+  --text-muted: rgba(15, 23, 42, 0.6);
   --accent: #16a34a;
   --accent-2: #ca8a04;
   --accent-3: #4f46e5;
@@ -74,6 +74,11 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+.shadow-elevated {
+  box-shadow: 0 20px 50px -12px var(--shadow), 0 8px 20px -8px var(--shadow);
 }
 
 a, button, select, [role="button"], summary {
