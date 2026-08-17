@@ -20,10 +20,10 @@ export function Navbar() {
     <header className="sticky top-0 z-30 border-b border-border bg-bg-primary/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
         <Link href="/menu" className="flex items-center gap-2">
-          <span className="text-2xl">🐆</span>
+          <span className="text-2xl"></span>
           <div className="leading-tight">
             <div className="font-display text-lg tracking-wide sm:text-xl">
-              FUT 7 · EL JAGUAR
+              FUT 7 · SOCCER
             </div>
             <div className="text-[10px] uppercase tracking-widest text-text-muted">
               Sistema de gestión
