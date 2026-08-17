@@ -46,9 +46,9 @@ export default function LoginPage() {
         className="card shadow-elevated relative w-full max-w-sm rounded-2xl p-8"
       >
         <div className="mb-6 text-center">
-          <div className="text-5xl">🐆</div>
+          <div className="text-5xl"></div>
           <h1 className="font-display mt-2 text-3xl tracking-wide">
-            FUT 7 · EL JAGUAR
+            FUT 7 · SOCCER
           </h1>
           <p className="text-sm text-text-muted">Inicia sesión para continuar</p>
         </div>
