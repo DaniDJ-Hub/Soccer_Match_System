@@ -1,4 +1,4 @@
-# Fut 7 El Jaguar — Next.js 15 Migration
+# Fut 7 Soccer — Next.js 15 Migration
 
 Full migration of the original multi-page vanilla JS/Express app into a single
 **Next.js 15 + React 19 + Tailwind v4** application, with adaptive dark/light
